@@ -9,7 +9,13 @@ from .serializers.image_serializer import ImageSerializer
 from .models import Annotation
 from .serializers.annotation_serializer import AnnotationSerializer
 from rest_framework.exceptions import PermissionDenied
+from .serializers.auth_serializer import EmailLoginSerializer
 
+@api_view(["POST"])
+def login(request):
+    serializer = EmailLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.validated_data)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

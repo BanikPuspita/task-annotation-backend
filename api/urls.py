@@ -1,14 +1,19 @@
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import profile, TaskListCreateView,TaskDetailView, ImageListCreateView, AnnotationListCreateView, AnnotationDetailView
+from .views import (
+    login,
+    profile,
+    TaskListCreateView,
+    TaskDetailView,
+    ImageListCreateView,
+    AnnotationListCreateView,
+    AnnotationDetailView,
+)
 
 
 urlpatterns = [
-    path("login/", TokenObtainPairView.as_view()),
+    path("login/", login),
     path("token/refresh/", TokenRefreshView.as_view()),
     path("profile/", profile),
     path("tasks/", TaskListCreateView.as_view(), name="task-list-create"),
