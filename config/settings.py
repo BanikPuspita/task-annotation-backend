@@ -159,3 +159,6 @@ SIMPLE_JWT = {
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Only for production assignment/demo
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)

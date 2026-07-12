@@ -9,7 +9,7 @@ urlpatterns = [
     path("api/", include("api.urls")),
 ]
 
-# Always serve media
+# Serve media files
 urlpatterns += static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT,
