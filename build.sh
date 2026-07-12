@@ -10,9 +10,23 @@ echo "📦 Running migrations..."
 python manage.py makemigrations api
 python manage.py migrate
 
-# Seed the database with sample data
-echo "🌱 Seeding database..."
-python manage.py seed_data
+# Ensure demo admin user exists (never wipe existing data)
+echo "👤 Ensuring admin user exists..."
+python manage.py shell -c "
+from django.contrib.auth.models import User;
+u='admin';
+e='admin@example.com';
+p='admin123';
+user, created = User.objects.get_or_create(username=u, defaults={'email': e});
+if created:
+    user.set_password(p);
+    user.is_staff = True;
+    user.is_superuser = True;
+    user.save();
+    print('Created admin user');
+else:
+    print('Admin user already exists');
+"
 
 # Collect static files
 echo "📁 Collecting static files..."
@@ -22,12 +36,3 @@ python manage.py collectstatic --noinput
 mkdir -p media/images
 
 echo "✅ Build completed successfully!"
-
-python manage.py shell -c "
-from django.contrib.auth.models import User;
-u='admin';
-e='admin@example.com';
-p='admin123';
-if not User.objects.filter(username=u).exists():
-    User.objects.create_superuser(u,e,p)
-"

@@ -8,7 +8,7 @@ Django REST API powering the TaskFlow fullstack app — task management, image u
 
 | Resource | Link |
 |----------|------|
-| **Hosted API (Render)** | https://task-annotation-backend.onrender.com |
+| **Hosted API (Render)** | https://task-annotation-backend.onrender.com/api |
 | **Django Admin** | https://task-annotation-backend.onrender.com/admin/ |
 | **GitHub Repository** | https://github.com/BanikPuspita/task-annotation-backend |
 | **Frontend App (Vercel)** | https://task-annotation-frontend-gilt.vercel.app |
@@ -141,6 +141,18 @@ The `django-cloudinary-storage` package caused Python compatibility issues durin
 
 **How I won:** Removed `cloudinary_storage` from `INSTALLED_APPS` and handled uploads directly in the view using the `cloudinary` Python SDK — simpler and more reliable.
 
+### Villain 6: Tasks and images disappearing after some time
+User-created tasks and images would vanish from both the frontend and Django admin after a while.
+
+**Root cause (two issues):**
+1. `build.sh` ran `seed_data` on every deploy, which called `Task.objects.all().delete()` — wiping all user data.
+2. SQLite on Render uses an ephemeral filesystem — the database file resets when the service restarts or redeploys.
+
+**How I won:**
+- Removed `seed_data` from the production build script.
+- Made `seed_data` safe — it only runs on an empty database and never deletes existing records.
+- Added PostgreSQL support via `DATABASE_URL` so production can use Render's persistent PostgreSQL instead of SQLite.
+
 ---
 
 ## Prerequisites
@@ -233,6 +245,16 @@ Then run `npm run dev` in the frontend folder.
 
 ## Deployment (Render)
 
+### Step 1: Create a PostgreSQL database (required for data persistence)
+
+1. In Render dashboard → **New** → **PostgreSQL**
+2. Name it (e.g. `taskflow-db`) and create it
+3. Copy the **Internal Database URL**
+
+> **Important:** Without PostgreSQL, SQLite data on Render will be lost on every redeploy or restart.
+
+### Step 2: Deploy the web service
+
 1. Push code to GitHub
 2. Create a new **Web Service** on Render linked to the backend repo
 3. Set environment variables:
@@ -243,12 +265,23 @@ Then run `npm run dev` in the frontend folder.
    | `DEBUG` | `False` |
    | `ALLOWED_HOSTS` | `task-annotation-backend.onrender.com` |
    | `CORS_ALLOWED_ORIGINS` | `https://task-annotation-frontend-gilt.vercel.app` |
+   | `DATABASE_URL` | Paste the PostgreSQL Internal Database URL |
    | `CLOUDINARY_CLOUD_NAME` | Your Cloudinary cloud name |
    | `CLOUDINARY_API_KEY` | Your Cloudinary API key |
    | `CLOUDINARY_API_SECRET` | Your Cloudinary API secret |
 
 4. Build command: `./build.sh`
 5. Start command: `gunicorn config.wsgi:application`
+
+### Step 3: Seed sample data (one-time, optional)
+
+After first deploy, open the Render **Shell** and run:
+
+```bash
+python manage.py seed_data
+```
+
+This only adds sample tasks if the database is empty — it will never delete your existing data.
 
 ---
 
@@ -257,6 +290,6 @@ Then run `npm run dev` in the frontend folder.
 | Command | Description |
 |---------|-------------|
 | `python manage.py migrate` | Apply database migrations |
-| `python manage.py seed_data` | Create demo user and sample tasks |
+| `python manage.py seed_data` | Create demo user and sample tasks (only if DB is empty) |
 | `python manage.py createsuperuser` | Create an admin user manually |
 | `python manage.py runserver` | Start local dev server |

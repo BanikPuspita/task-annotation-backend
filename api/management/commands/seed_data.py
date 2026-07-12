@@ -1,15 +1,14 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from api.models import Task, Image, Annotation
+from api.models import Task
 from datetime import date, timedelta
 
 class Command(BaseCommand):
-    help = 'Seed the database with sample data'
+    help = 'Seed the database with sample data (only if empty — never deletes existing data)'
 
     def handle(self, *args, **options):
         self.stdout.write('🌱 Seeding database...')
-        
-        # Create or get demo user
+
         user, created = User.objects.get_or_create(
             username='admin',
             defaults={
@@ -18,14 +17,17 @@ class Command(BaseCommand):
         )
         if created:
             user.set_password('admin123')
+            user.is_staff = True
+            user.is_superuser = True
             user.save()
             self.stdout.write(f'✅ Created user: {user.username}')
-        
-        # Clear existing tasks (optional)
-        Task.objects.all().delete()
-        self.stdout.write('🗑️  Cleared existing tasks')
-        
-        # Create sample tasks
+
+        if Task.objects.exists():
+            self.stdout.write(self.style.WARNING(
+                '⏭️  Tasks already exist — skipping seed to preserve your data.'
+            ))
+            return
+
         tasks = [
             {
                 'title': 'Complete Project Documentation',
@@ -82,14 +84,11 @@ class Command(BaseCommand):
                 'tags': ['testing', 'quality']
             },
         ]
-        
+
         created_count = 0
         for task_data in tasks:
-            task = Task.objects.create(
-                user=user,
-                **task_data
-            )
+            Task.objects.create(user=user, **task_data)
             created_count += 1
-            self.stdout.write(f'  📝 Created task: {task.title}')
-        
+            self.stdout.write(f'  📝 Created task: {task_data["title"]}')
+
         self.stdout.write(self.style.SUCCESS(f'✅ Successfully created {created_count} tasks!'))
