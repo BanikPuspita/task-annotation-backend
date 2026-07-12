@@ -5,11 +5,10 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = "__all__"
-        read_only_fields = ["user"]
+        read_only_fields = ["user", "public_id"]
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        # Cloudinary already returns the full URL
-        if instance.image:
-            data['image'] = instance.image.url
+        # Send the image_url as the image field to keep frontend compatibility
+        data['image'] = instance.image_url
         return data

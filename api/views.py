@@ -10,6 +10,11 @@ from .models import Annotation
 from .serializers.annotation_serializer import AnnotationSerializer
 from rest_framework.exceptions import PermissionDenied
 from .serializers.auth_serializer import EmailLoginSerializer
+import cloudinary.uploader
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import Image
+from .serializers.image_serializer import ImageSerializer
 
 @api_view(["POST"])
 def login(request):
@@ -64,8 +69,26 @@ class ImageListCreateView(generics.ListCreateAPIView):
         return Image.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Get the uploaded file from request
+        uploaded_file = self.request.FILES.get('image')
         
+        if uploaded_file:
+            # Upload to Cloudinary
+            upload_result = cloudinary.uploader.upload(
+                uploaded_file,
+                folder='taskflow_images/',
+                resource_type='image'
+            )
+            
+            # Save the image with Cloudinary URL
+            serializer.save(
+                user=self.request.user,
+                image_url=upload_result['secure_url'],
+                public_id=upload_result['public_id']
+            )
+        else:
+            # Fallback for any other case
+            serializer.save(user=self.request.user)   
         
 class AnnotationListCreateView(generics.ListCreateAPIView):
     serializer_class = AnnotationSerializer
