@@ -2,13 +2,21 @@ from rest_framework import serializers
 from api.models import Image
 
 class ImageSerializer(serializers.ModelSerializer):
+    # Add a custom field for backward compatibility
+    image = serializers.SerializerMethodField()
+    
     class Meta:
         model = Image
-        fields = "__all__"
-        read_only_fields = ["user", "public_id"]
+        fields = ['id', 'user', 'title', 'image_url', 'public_id', 'uploaded_at', 'image']
+        read_only_fields = ["user", "public_id", "uploaded_at"]
+    
+    def get_image(self, obj):
+        # Return image_url as 'image' for frontend compatibility
+        return obj.image_url if obj.image_url else None
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        # Send the image_url as the image field to keep frontend compatibility
-        data['image'] = instance.image_url
+        # Ensure the image field is always present
+        if not data.get('image'):
+            data['image'] = None
         return data

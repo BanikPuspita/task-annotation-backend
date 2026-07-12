@@ -8,8 +8,8 @@ class Image(models.Model):
         related_name="images"
     )
     title = models.CharField(max_length=255)
-    image_url = models.URLField(max_length=500)  # Store Cloudinary URL
-    public_id = models.CharField(max_length=255, blank=True)  # Store Cloudinary public ID
+    image_url = models.URLField(max_length=500, blank=True, null=True)  # Store Cloudinary URL
+    public_id = models.CharField(max_length=255, blank=True, null=True)  # Store Cloudinary public ID
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
