@@ -270,8 +270,8 @@ Then run `npm run dev` in the frontend folder.
    | `CLOUDINARY_API_KEY` | Your Cloudinary API key |
    | `CLOUDINARY_API_SECRET` | Your Cloudinary API secret |
 
-4. Build command: `./build.sh`
-5. Start command: `python -m gunicorn config.wsgi:application`
+4. Build command: `pip install -r requirements.txt && ./build.sh`
+5. Start command: `gunicorn config.wsgi:application`
 
 ### Step 3: Seed sample data (one-time, optional)
 
