@@ -1,5 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
+
+
+class Image(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="images"
+    )
+    title = models.CharField(max_length=255)
+    image = CloudinaryField('image', folder='taskflow_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
 
 
 class Task(models.Model):

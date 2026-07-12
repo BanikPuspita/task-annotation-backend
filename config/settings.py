@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,6 +37,22 @@ ALLOWED_HOSTS = config(
 ).split(",")
 
 
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
+# Use Cloudinary for media storage
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,7 +66,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "api",
+    'cloudinary',
 ]
+
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -140,11 +161,14 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
-    default="http://localhost:5173"
+    default="http://localhost:5173,https://task-annotation-frontend-gilt.vercel.app"
 ).split(",")
+
+CORS_ALLOW_CREDENTIALS = True
+
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -162,3 +186,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Only for production assignment/demo
 MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+
+# Media files will be stored on Cloudinary
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
