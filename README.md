@@ -8,7 +8,7 @@ Django REST API powering the TaskFlow fullstack app — task management, image u
 
 | Resource | Link |
 |----------|------|
-| **Hosted API (Render)** | https://task-annotation-backend.onrender.com/api |
+| **Hosted API (Render)** | https://task-annotation-backend.onrender.com |
 | **Django Admin** | https://task-annotation-backend.onrender.com/admin/ |
 | **GitHub Repository** | https://github.com/BanikPuspita/task-annotation-backend |
 | **Frontend App (Vercel)** | https://task-annotation-frontend-gilt.vercel.app |
