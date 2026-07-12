@@ -13,10 +13,3 @@ class ImageSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         # Return image_url as 'image' for frontend compatibility
         return obj.image_url if obj.image_url else None
-    
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Ensure the image field is always present
-        if not data.get('image'):
-            data['image'] = None
-        return data
